@@ -12,7 +12,11 @@ const sequelize = new Sequelize(
     logging: false,              // Nonaktifkan logging SQL
     timezone: '+07:00',          // Atur timezone ke WIB (UTC+7)
     dialectOptions: {
-      useUTC: false              // Jangan gunakan UTC di PostgreSQL
+    ssl: {
+    require: true,
+    rejectUnauthorized: false
+     },
+      useUTC: false
     }
   }
 );
