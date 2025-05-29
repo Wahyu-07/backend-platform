@@ -3,7 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const { sequelize } = require('./models'); // Menggunakan sequelize dari models
+const { sequelize } = require('./config/database'); // Menggunakan sequelize dari models
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
