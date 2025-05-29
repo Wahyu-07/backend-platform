@@ -24,6 +24,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
 
+app.get('/', (req, res) => {
+  res.send('🚀 API Platform Aspirasi Mahasiswa berjalan!');
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/postingan', postinganRoutes);
