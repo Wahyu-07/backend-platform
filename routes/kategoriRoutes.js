@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const kategoriController = require('../controllers/kategoriControllers');
+const kategoriController = require('../controllers/kategoriController');
 const { authenticate } = require('../middleware/authentikasi');
 const { forPeninjau } = require('../middleware/authorisasi');
 
