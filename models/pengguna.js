@@ -1,4 +1,3 @@
-
 const { Sequelize, DataTypes } = require('sequelize');
 const { toWIB } = require('../utils/waktu');
 
@@ -32,8 +31,13 @@ module.exports = (sequelize) => {
       allowNull: false,
       defaultValue: 'pengguna', // ✅ Tambahkan default
       validate: {
-        isIn: [['pengelola', 'pengguna']],
+        isIn: [['peninjau', 'pengguna']],
       }
+    },
+    profile_picture: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: null,
     },
     dibuat_pada: {
       type: DataTypes.DATE,

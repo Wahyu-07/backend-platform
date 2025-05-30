@@ -1,4 +1,5 @@
 const { Komentar, Postingan, Pengguna, Interaksi } = require('../models');
+const { createCommentNotification } = require('./notifikasiController');
 
 // GET semua komentar lengkap dengan relasi
 const getAllKomentar = async (req, res) => {
@@ -54,7 +55,50 @@ const createKomentar = async (req, res) => {
       anonim: anonim ?? false
     });
 
-    res.status(201).json(komentar);
+    // Buat notifikasi untuk pemilik postingan
+    try {
+      // Ambil data postingan dan pemiliknya
+      const postingan = await Postingan.findByPk(id_postingan, {
+        include: [
+          {
+            model: Pengguna,
+            as: 'penulis',
+            attributes: ['id', 'nama']
+          }
+        ]
+      });
+
+      if (postingan && postingan.penulis) {
+        // Ambil data user yang membuat komentar
+        const userPengirim = await Pengguna.findByPk(id_penulis, {
+          attributes: ['nama']
+        });
+
+        if (userPengirim) {
+          await createCommentNotification(
+            id_penulis,
+            postingan.penulis.id,
+            id_postingan,
+            komentar.id,
+            userPengirim.nama,
+            postingan.judul
+          );
+        }
+      }
+    } catch (notifError) {
+      console.error('Error creating comment notification:', notifError);
+      // Jangan gagalkan request utama jika notifikasi gagal
+    }
+
+    // Ambil komentar dengan relasi untuk response
+    const komentarWithRelations = await Komentar.findByPk(komentar.id, {
+      include: [
+        { model: Postingan, as: 'postingan' },
+        { model: Pengguna, as: 'penulis', attributes: { exclude: ['kata_sandi'] } }
+      ]
+    });
+
+    res.status(201).json(komentarWithRelations);
   } catch (error) {
     res.status(500).json({ error: 'Gagal membuat komentar', detail: error.message });
   }
@@ -105,4 +149,3 @@ module.exports = {
   updateKomentar,
   deleteKomentar,
 };
-  

@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 
 const express = require('express');
@@ -12,6 +13,7 @@ const komentarRoutes = require('./routes/komentarRoutes');
 const interaksiRoutes = require('./routes/interaksiRoutes');
 const penggunaRoutes = require('./routes/penggunaRoutes'); // ✅ Tambahkan route pengguna
 const kategoriRoutes = require('./routes/kategoriRoutes');
+const notifikasiRoutes = require('./routes/notifikasiRoutes'); // ✅ Tambahkan route notifikasi
 
 // Memuat variabel lingkungan dari file .env
 require('dotenv').config();
@@ -35,6 +37,7 @@ app.use('/api/komentar', komentarRoutes);
 app.use('/api/interaksi', interaksiRoutes);
 app.use('/api/pengguna', penggunaRoutes);
 app.use('/api/kategori', kategoriRoutes);
+app.use('/api/notifikasi', notifikasiRoutes); // ✅ Tambahkan route notifikasi
 
 // Koneksi ke database dan sinkronisasi
 async function connectDatabase() {

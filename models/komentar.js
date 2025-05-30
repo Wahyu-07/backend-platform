@@ -1,4 +1,3 @@
-
 const { Sequelize, DataTypes } = require('sequelize');
 const { toWIB } = require('../utils/waktu'); // pastikan utils/waktu sudah ada
 

@@ -1,16 +1,17 @@
-
 const { Sequelize, DataTypes } = require('sequelize');
 
-// Daftar kategori ENUM (harus sama persis dengan di DB)
+// Daftar kategori ENUM (10 kategori standar)
 const kategoriEnum = [
-  'Fasilitas Bangunan',
-  'Kebersihan dan Lingkungan',
-  'Sarana dan Prasarana Teknologi',
-  'Keamanan Kampus',
-  'Layanan Akademik',
-  'Kegiatan dan Organisasi Mahasiswa',
-  'Makanan dan Kantin',
-  'Lainnya'
+  'Fasilitas Kampus',
+  'Akademik',
+  'Kesejahteraan Mahasiswa',
+  'Kegiatan Kemahasiswaan',
+  'Sarana dan Prasarana Digital',
+  'Keamanan dan Ketertiban',
+  'Lingkungan dan Kebersihan',
+  'Transportasi dan Akses',
+  'Kebijakan dan Administrasi',
+  'Saran dan Inovasi'
 ];
 
 module.exports = (sequelize) => {

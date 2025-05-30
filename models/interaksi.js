@@ -1,4 +1,3 @@
-
 const { Sequelize, DataTypes } = require('sequelize');
 const { toWIB } = require('../utils/waktu');
 
@@ -24,6 +23,10 @@ module.exports = (sequelize) => {
     },
     id_komentar: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    alasan_laporan: {
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
     dibuat_pada: {

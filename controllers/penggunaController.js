@@ -49,17 +49,16 @@ const getPostinganByPenggunaId = async (req, res) => {
     const postingan = await Postingan.findAll({
       where: { id_penulis: id },
       order: [['dibuat_pada', 'DESC']],
+      include: [
+        {
+          model: require('../models').Kategori,
+          as: 'kategori'
+        }
+      ]
     });
 
-    if (!postingan || postingan.length === 0) {
-      return res.status(404).json({ error: 'Tidak ada postingan yang ditemukan untuk pengguna ini' });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: postingan,
-      message: `Postingan milik pengguna dengan nama ${pengguna.nama}`,
-    });
+    // Return empty array instead of 404 for consistency with frontend
+    res.status(200).json(postingan);
   } catch (error) {
     res.status(500).json({
       error: 'Gagal mengambil data postingan pengguna',

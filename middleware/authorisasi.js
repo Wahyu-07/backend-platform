@@ -6,22 +6,22 @@ const forPengguna = (req, res, next) => {
   next();
 };
 
-const forPengelola = (req, res, next) => {
-  if (!req.user || req.user.peran !== 'pengelola') {
-    return res.status(403).json({ message: 'Akses hanya untuk pengelola' });
+const forPeninjau = (req, res, next) => {
+  if (!req.user || req.user.peran !== 'peninjau') {
+    return res.status(403).json({ message: 'Akses hanya untuk peninjau' });
   }
   next();
 };
 
-const forPenggunaDanPengelola = (req, res, next) => {
-  if (!req.user || (req.user.peran !== 'pengguna' && req.user.peran !== 'pengelola')) {
-    return res.status(403).json({ message: 'Akses hanya untuk pengguna atau pengelola' });
+const forPenggunaDanPeninjau = (req, res, next) => {
+  if (!req.user || (req.user.peran !== 'pengguna' && req.user.peran !== 'peninjau')) {
+    return res.status(403).json({ message: 'Akses hanya untuk pengguna atau peninjau' });
   }
   next();
 };
 
 module.exports = {
   forPengguna,
-  forPengelola,
-  forPenggunaDanPengelola
+  forPeninjau,
+  forPenggunaDanPeninjau
 };
