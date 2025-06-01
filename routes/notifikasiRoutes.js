@@ -4,20 +4,32 @@ const { authenticate } = require('../middleware/authentikasi');
 const {
   getAllNotifikasi,
   createNotifikasi,
-  tandaiNotifikasiDibaca,
-  tandaiSemuaDibaca,
+  markAsRead,
+  markAllAsRead,
 } = require('../controllers/notifikasiController');
 
-// Ambil semua notifikasi untuk pengguna login
+/**
+ * GET /api/notifikasi
+ * Mendapatkan semua notifikasi untuk user yang sedang login
+ */
 router.get('/', authenticate, getAllNotifikasi);
 
-// Buat notifikasi baru
+/**
+ * POST /api/notifikasi
+ * Membuat notifikasi baru
+ */
 router.post('/', authenticate, createNotifikasi);
 
-// Tandai satu notifikasi sebagai dibaca
-router.put('/:id/dibaca', authenticate, tandaiNotifikasiDibaca);
+/**
+ * PUT /api/notifikasi/:id/read
+ * Menandai notifikasi sebagai sudah dibaca
+ */
+router.put('/:id/read', authenticate, markAsRead);
 
-// Tandai semua notifikasi sebagai dibaca
-router.put('/semua/dibaca', authenticate, tandaiSemuaDibaca);
+/**
+ * PUT /api/notifikasi/read-all
+ * Menandai semua notifikasi sebagai sudah dibaca
+ */
+router.put('/read-all', authenticate, markAllAsRead);
 
 module.exports = router;
