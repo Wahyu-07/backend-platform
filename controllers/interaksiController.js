@@ -4,11 +4,48 @@ const { createLikeNotification } = require('./notifikasiController');
 // GET semua interaksi
 const getAllInteraksi = async (req, res) => {
   try {
+    // Filter untuk hanya menampilkan reports yang aktif (belum diselesaikan/diabaikan)
+    const whereClause = {};
+
+    // Untuk admin panel, hanya tampilkan reports yang aktif
+    // Reports yang sudah diabaikan/diselesaikan tidak perlu ditampilkan
+    whereClause.status = 'aktif';
+
     const interaksi = await Interaksi.findAll({
+      where: whereClause,
       include: [
-        { model: Komentar, as: 'komentar' },
-        { model: Postingan, as: 'postingan' },
-        { model: Pengguna, as: 'pengguna' }
+        {
+          model: Komentar,
+          as: 'komentar',
+          include: [
+            {
+              model: Pengguna,
+              as: 'penulis',
+              attributes: ['id', 'nama', 'peran']
+            }
+          ]
+        },
+        {
+          model: Postingan,
+          as: 'postingan',
+          include: [
+            {
+              model: Pengguna,
+              as: 'penulis',
+              attributes: ['id', 'nama', 'peran']
+            },
+            {
+              model: require('../models').Kategori,
+              as: 'kategori',
+              attributes: ['id', 'nama']
+            }
+          ]
+        },
+        {
+          model: Pengguna,
+          as: 'pengguna',
+          attributes: ['id', 'nama', 'peran']
+        }
       ]
     });
     res.json(interaksi);
@@ -207,6 +244,39 @@ const updateInteraksi = async (req, res) => {
   }
 };
 
+// PUT update status report (untuk admin)
+const updateReportStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validasi status
+    const validStatus = ['aktif', 'diabaikan', 'diselesaikan'];
+    if (!validStatus.includes(status)) {
+      return res.status(400).json({ error: 'Status tidak valid' });
+    }
+
+    const interaksi = await Interaksi.findByPk(id);
+    if (!interaksi) {
+      return res.status(404).json({ error: 'Report tidak ditemukan' });
+    }
+
+    // Hanya bisa update report (tipe lapor)
+    if (interaksi.tipe !== 'lapor') {
+      return res.status(400).json({ error: 'Hanya report yang bisa diupdate statusnya' });
+    }
+
+    await interaksi.update({ status });
+
+    res.json({
+      message: `Status report berhasil diubah menjadi ${status}`,
+      interaksi: interaksi
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Gagal mengupdate status report', detail: error.message });
+  }
+};
+
 // DELETE interaksi
 const deleteInteraksi = async (req, res) => {
   try {
@@ -228,5 +298,6 @@ module.exports = {
   createInteraksiPostingan,
   createInteraksiKomentar,
   updateInteraksi,
+  updateReportStatus,
   deleteInteraksi,
 };
