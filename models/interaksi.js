@@ -29,11 +29,6 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING(255),
       allowNull: true,
     },
-    status: {
-      type: DataTypes.ENUM('aktif', 'diabaikan', 'diselesaikan'),
-      allowNull: false,
-      defaultValue: 'aktif',
-    },
     dibuat_pada: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,

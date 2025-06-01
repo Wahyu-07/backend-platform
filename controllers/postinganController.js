@@ -43,12 +43,12 @@ const getPostinganByNamaKategori = async (req, res) => {
 
 /**
  * CREATE postingan baru
- * Body: { id_kategori, judul, konten, anonim } atau { nama_kategori, judul, konten, anonim }
+ * Body: { id_kategori, judul, konten, anonim, tipe } atau { nama_kategori, judul, konten, anonim, tipe }
  * id_penulis diambil dari req.user.id hasil verifikasi token JWT
  */
 const createPostingan = async (req, res) => {
   try {
-    const { id_kategori, nama_kategori, judul, konten, anonim } = req.body;
+    const { id_kategori, nama_kategori, judul, konten, anonim, tipe } = req.body;
 
     // Ambil id_penulis dari token (middleware auth harus menyediakan ini)
     const id_penulis = req.user.id;
@@ -84,6 +84,7 @@ const createPostingan = async (req, res) => {
       judul,
       konten,
       anonim: anonim || false,
+      tipe: tipe || 'aspirasi',
     });
 
     // Ambil postingan dengan relasi untuk response
@@ -119,13 +120,6 @@ const getAllPostingan = async (req, res) => {
     // Filter berdasarkan id_penulis jika ada
     if (id_penulis) {
       whereClause.id_penulis = id_penulis;
-    }
-
-    // Filter untuk hanya menampilkan postingan aktif (tidak terarsip)
-    // Kecuali jika user adalah peninjau yang mengakses admin panel
-    const isAdminRequest = req.headers['x-admin-request'] === 'true';
-    if (!isAdminRequest) {
-      whereClause.status = 'aktif';
     }
 
     // Filter berdasarkan kategori jika ada dan bukan 'semua'
@@ -182,17 +176,10 @@ const getAllPostingan = async (req, res) => {
         where: { id_postingan: post.id, tipe: 'downvote' }
       });
 
-      // Hitung jumlah komentar
-      const { Komentar } = require('../models');
-      const commentCount = await Komentar.count({
-        where: { id_postingan: post.id }
-      });
-
       return {
         ...postData,
         upvote_count: upvoteCount,
-        downvote_count: downvoteCount,
-        comment_count: commentCount
+        downvote_count: downvoteCount
       };
     }));
 
@@ -259,58 +246,26 @@ const getPostinganById = async (req, res) => {
 
 /**
  * UPDATE postingan berdasarkan ID
- * Body: { judul, konten, anonim, status }
+ * Body: { judul, konten, anonim }
  */
 const updatePostingan = async (req, res) => {
   try {
-    const { judul, konten, anonim, status } = req.body;
+    const { judul, konten, anonim } = req.body;
 
-    // Cek apakah postingan ada
-    const existingPost = await Postingan.findByPk(req.params.id);
-    if (!existingPost) {
+    // Update postingan dan ambil hasil update nya
+    const [jumlahUpdate, postingan] = await Postingan.update(
+      { judul, konten, anonim },
+      {
+        where: { id: req.params.id },
+        returning: true
+      }
+    );
+
+    if (jumlahUpdate === 0) {
       return res.status(404).json({ message: 'Postingan tidak ditemukan' });
     }
 
-    // Prepare update data - hanya update field yang diberikan
-    const updateData = {};
-    if (judul !== undefined) updateData.judul = judul;
-    if (konten !== undefined) updateData.konten = konten;
-    if (anonim !== undefined) updateData.anonim = anonim;
-    if (status !== undefined) updateData.status = status;
-
-    // Update postingan
-    await Postingan.update(updateData, {
-      where: { id: req.params.id }
-    });
-
-    // Jika status diubah menjadi 'terarsip', update status semua report terkait menjadi 'diselesaikan'
-    if (status === 'terarsip') {
-      const { Interaksi } = require('../models');
-      await Interaksi.update(
-        { status: 'diselesaikan' },
-        {
-          where: {
-            id_postingan: req.params.id,
-            tipe: 'lapor',
-            status: 'aktif'
-          }
-        }
-      );
-    }
-
-    // Ambil postingan yang sudah diupdate dengan relasi
-    const updatedPost = await Postingan.findByPk(req.params.id, {
-      include: [
-        { model: Kategori, as: 'kategori' },
-        {
-          model: Pengguna,
-          as: 'penulis',
-          attributes: { exclude: ['kata_sandi'] }
-        }
-      ]
-    });
-
-    res.status(200).json(updatedPost);
+    res.status(200).json(postingan[0]);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Gagal memperbarui postingan', error });
@@ -322,29 +277,13 @@ const updatePostingan = async (req, res) => {
  */
 const deletePostingan = async (req, res) => {
   try {
-    // Cek apakah postingan ada
-    const existingPost = await Postingan.findByPk(req.params.id);
-    if (!existingPost) {
-      return res.status(404).json({ message: 'Postingan tidak ditemukan' });
-    }
-
-    // Update status semua report terkait menjadi 'diselesaikan' sebelum menghapus
-    const { Interaksi } = require('../models');
-    await Interaksi.update(
-      { status: 'diselesaikan' },
-      {
-        where: {
-          id_postingan: req.params.id,
-          tipe: 'lapor',
-          status: 'aktif'
-        }
-      }
-    );
-
-    // Hapus postingan
     const jumlahHapus = await Postingan.destroy({
       where: { id: req.params.id }
     });
+
+    if (!jumlahHapus) {
+      return res.status(404).json({ message: 'Postingan tidak ditemukan' });
+    }
 
     res.status(200).json({ message: 'Postingan berhasil dihapus' });
   } catch (error) {
