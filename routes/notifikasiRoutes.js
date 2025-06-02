@@ -14,10 +14,10 @@ router.get('/', authenticate, getAllNotifikasi);
 // Buat notifikasi baru
 router.post('/', authenticate, createNotifikasi);
 
+// Tandai semua notifikasi sebagai dibaca (harus sebelum /:id/dibaca)
+router.put('/semua-dibaca', authenticate, tandaiSemuaDibaca);
+
 // Tandai satu notifikasi sebagai dibaca
 router.put('/:id/dibaca', authenticate, tandaiNotifikasiDibaca);
-
-// Tandai semua notifikasi sebagai dibaca
-router.put('/semua-dibaca', authenticate, tandaiSemuaDibaca);
 
 module.exports = router;
