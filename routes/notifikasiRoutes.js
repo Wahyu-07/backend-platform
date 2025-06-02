@@ -18,6 +18,6 @@ router.post('/', authenticate, createNotifikasi);
 router.put('/:id/dibaca', authenticate, tandaiNotifikasiDibaca);
 
 // Tandai semua notifikasi sebagai dibaca
-router.put('/semua/dibaca', authenticate, tandaiSemuaDibaca);
+router.put('/semua-dibaca', authenticate, tandaiSemuaDibaca);
 
 module.exports = router;
