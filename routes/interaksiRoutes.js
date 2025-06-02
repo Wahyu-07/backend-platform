@@ -7,12 +7,16 @@ const { forPengguna, forPenggunaDanPeninjau } = require('../middleware/authorisa
 router.get('/', interaksiController.getAllInteraksi);
 router.get('/:id', interaksiController.getInteraksiById);
 
-// Hanya pengguna yang boleh membuat interaksi postingan/komentar
-router.post('/postingan', authenticate, forPengguna, interaksiController.createInteraksiPostingan);
-router.post('/komentar', authenticate, forPengguna, interaksiController.createInteraksiKomentar);
+// Pengguna dan peninjau boleh membuat interaksi postingan/komentar
+router.post('/postingan', authenticate, forPenggunaDanPeninjau, interaksiController.createInteraksiPostingan);
+router.post('/komentar', authenticate, forPenggunaDanPeninjau, interaksiController.createInteraksiKomentar);
 
 // Update dan delete hanya boleh dilakukan pemilik interaksi atau peninjau
 router.put('/:id', authenticate, forPengguna, interaksiController.updateInteraksi);
+
+// Update status report (khusus untuk peninjau/admin)
+router.put('/:id/status', authenticate, forPenggunaDanPeninjau, interaksiController.updateReportStatus);
+
 router.delete('/:id', authenticate, forPenggunaDanPeninjau, interaksiController.deleteInteraksi);
 
 module.exports = router;
