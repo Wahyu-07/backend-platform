@@ -44,10 +44,16 @@ module.exports = (sequelize) => {
     dibuat_pada: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
-        get() {
-        // Menambahkan konversi waktu WIB pada saat pengambilan data
-        const value = this.getDataValue('dibuat_pada');
-        return toWIB(value);  // Menggunakan fungsi toWIB untuk konversi ke WIB
+      get() {
+        try {
+          // Menambahkan konversi waktu WIB pada saat pengambilan data
+          const value = this.getDataValue('dibuat_pada');
+          if (!value) return null;
+          return toWIB(value);  // Menggunakan fungsi toWIB untuk konversi ke WIB
+        } catch (error) {
+          console.error('Error in dibuat_pada getter:', error);
+          return this.getDataValue('dibuat_pada'); // Return raw value if conversion fails
+        }
       }
     },
   }, {

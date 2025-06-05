@@ -112,6 +112,8 @@ const createPostingan = async (req, res) => {
  */
 const getAllPostingan = async (req, res) => {
   try {
+    console.log('📝 getAllPostingan called with query:', req.query);
+
     const { id_penulis, filter, sort } = req.query;
 
     let whereClause = {};
@@ -149,6 +151,7 @@ const getAllPostingan = async (req, res) => {
     }
 
     // Sorting akan ditangani setelah mendapat data dengan upvote count
+    console.log('🔍 Query whereClause:', whereClause);
 
     const postingan = await Postingan.findAll({
       where: whereClause,
@@ -162,6 +165,8 @@ const getAllPostingan = async (req, res) => {
         }
       ]
     });
+
+    console.log('📊 Found posts:', postingan.length);
 
     // Tambahkan jumlah upvote dan downvote ke setiap postingan dengan query terpisah
     const postinganWithCounts = await Promise.all(postingan.map(async (post) => {
@@ -197,10 +202,16 @@ const getAllPostingan = async (req, res) => {
       postinganWithCounts.sort((a, b) => new Date(b.dibuat_pada) - new Date(a.dibuat_pada));
     }
 
+    console.log('✅ Returning posts with counts:', postinganWithCounts.length);
     res.status(200).json(postinganWithCounts);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Gagal mendapatkan postingan', error });
+    console.error('❌ Error in getAllPostingan:', error);
+    console.error('❌ Error stack:', error.stack);
+    res.status(500).json({
+      message: 'Gagal mendapatkan postingan',
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 

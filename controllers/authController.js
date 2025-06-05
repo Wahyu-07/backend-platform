@@ -5,6 +5,7 @@ const { Pengguna } = require('../models');
 // POST /register
 const register = async (req, res) => {
   try {
+    console.log('📝 Register request received:', { nim: req.body.nim, nama: req.body.nama, email: req.body.email, peran: req.body.peran });
     const { nim, nama, email, kata_sandi, peran, kodeRahasia } = req.body;
 
     if (!nim || !nama || !email || !kata_sandi) {
@@ -21,7 +22,7 @@ const register = async (req, res) => {
     let finalPeran = 'pengguna';
 
     if (peran === 'peninjau') {
-      if (kodeRahasia === 'peninjau') {
+      if (kodeRahasia === 'peninjauaspirasiku') {
         finalPeran = 'peninjau';
       } else {
         return res.status(403).json({ message: 'Kode rahasia tidak valid untuk membuat akun peninjau' });
@@ -43,6 +44,7 @@ const register = async (req, res) => {
       { expiresIn: '1d' }
     );
 
+    console.log('✅ Registration successful for:', pengguna.email);
     res.status(201).json({
       message: 'Registrasi berhasil',
       token,
@@ -55,6 +57,7 @@ const register = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('❌ Registration error:', err.message);
     res.status(500).json({ message: 'Gagal registrasi', error: err.message });
   }
 };
@@ -63,6 +66,7 @@ const register = async (req, res) => {
 // POST /login
 const login = async (req, res) => {
   try {
+    console.log('🔐 Login request received:', { email: req.body.email });
     const { email, kata_sandi } = req.body;
 
     if (!email || !kata_sandi) {
@@ -97,6 +101,7 @@ const login = async (req, res) => {
       { expiresIn: '1d' }
     );
 
+    console.log('✅ Login successful for:', pengguna.email);
     res.json({
       message: 'Login berhasil',
       token,
@@ -109,6 +114,7 @@ const login = async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('❌ Login error:', err.message);
     res.status(500).json({ message: 'Login gagal', error: err.message });
   }
 };
