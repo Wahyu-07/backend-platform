@@ -7,8 +7,9 @@ const getAllKomentar = async (req, res) => {
     const komentar = await Komentar.findAll({
       include: [
         { model: Postingan, as: 'postingan' },
-        { model: Pengguna, as: 'penulis' },
-        { model: Interaksi, as: 'interaksi' }
+        { model: Pengguna, as: 'penulis' }
+        // Temporarily removed Interaksi include due to missing status column in production
+        // { model: Interaksi, as: 'interaksi' }
       ]
     });
     res.json(komentar);
@@ -23,8 +24,9 @@ const getKomentarById = async (req, res) => {
     const komentar = await Komentar.findByPk(req.params.id, {
       include: [
         { model: Postingan, as: 'postingan' },
-        { model: Pengguna, as: 'penulis' },
-        { model: Interaksi, as: 'interaksi' }
+        { model: Pengguna, as: 'penulis' }
+        // Temporarily removed Interaksi include due to missing status column in production
+        // { model: Interaksi, as: 'interaksi' }
       ]
     });
     if (!komentar) {
