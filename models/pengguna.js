@@ -66,6 +66,18 @@ module.exports = (sequelize) => {
       foreignKey: 'id_pengguna',
       as: 'interaksi',
     });
+
+    // Notifikasi yang diterima
+    Pengguna.hasMany(models.Notifikasi, {
+      foreignKey: 'id_penerima',
+      as: 'notifikasiDiterima',
+    });
+
+    // Notifikasi yang dikirim
+    Pengguna.hasMany(models.Notifikasi, {
+      foreignKey: 'id_pengirim',
+      as: 'notifikasiDikirim',
+    });
   };
 
   return Pengguna;

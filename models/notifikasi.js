@@ -42,7 +42,7 @@ module.exports = (sequelize) => {
       }
     },
     tipe: {
-      type: DataTypes.ENUM('like', 'comment', 'reply', 'mention', 'system'),
+      type: DataTypes.ENUM('like', 'downvote', 'comment', 'reply', 'mention', 'system'),
       allowNull: false,
     },
     judul: {
@@ -70,7 +70,32 @@ module.exports = (sequelize) => {
     timestamps: false,
   });
 
-  // Associations will be defined in index.js
+  // Define associations
+  Notifikasi.associate = (models) => {
+    // Notifikasi belongs to penerima (receiver)
+    Notifikasi.belongsTo(models.Pengguna, {
+      foreignKey: 'id_penerima',
+      as: 'penerima',
+    });
+
+    // Notifikasi belongs to pengirim (sender)
+    Notifikasi.belongsTo(models.Pengguna, {
+      foreignKey: 'id_pengirim',
+      as: 'pengirim',
+    });
+
+    // Notifikasi belongs to postingan
+    Notifikasi.belongsTo(models.Postingan, {
+      foreignKey: 'id_postingan',
+      as: 'postingan',
+    });
+
+    // Notifikasi belongs to komentar
+    Notifikasi.belongsTo(models.Komentar, {
+      foreignKey: 'id_komentar',
+      as: 'komentar',
+    });
+  };
 
   return Notifikasi;
 };
