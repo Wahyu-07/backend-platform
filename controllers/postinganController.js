@@ -84,7 +84,6 @@ const createPostingan = async (req, res) => {
       judul,
       konten,
       anonim: anonim || false,
-      tipe: tipe || 'aspirasi',
     });
 
     // Ambil postingan dengan relasi untuk response

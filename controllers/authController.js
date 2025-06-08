@@ -12,9 +12,16 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Semua field wajib diisi' });
     }
 
-    const existing = await Pengguna.findOne({ where: { email } });
-    if (existing) {
+    // Check for existing email
+    const existingEmail = await Pengguna.findOne({ where: { email } });
+    if (existingEmail) {
       return res.status(409).json({ message: 'Email sudah digunakan' });
+    }
+
+    // Check for existing NIM
+    const existingNim = await Pengguna.findOne({ where: { nim } });
+    if (existingNim) {
+      return res.status(409).json({ message: 'NIM sudah digunakan' });
     }
 
     const hashed = await bcrypt.hash(kata_sandi, 10);
@@ -58,6 +65,25 @@ const register = async (req, res) => {
     });
   } catch (err) {
     console.error('❌ Registration error:', err.message);
+
+    // Handle specific validation errors
+    if (err.name === 'SequelizeValidationError' || err.name === 'SequelizeUniqueConstraintError') {
+      const errors = err.errors || [];
+      const errorMessages = errors.map(error => {
+        if (error.path === 'nim') {
+          return 'NIM sudah digunakan';
+        } else if (error.path === 'email') {
+          return 'Email sudah digunakan';
+        }
+        return error.message;
+      });
+
+      return res.status(409).json({
+        message: errorMessages.length > 0 ? errorMessages[0] : 'Data sudah digunakan',
+        errors: errorMessages
+      });
+    }
+
     res.status(500).json({ message: 'Gagal registrasi', error: err.message });
   }
 };
