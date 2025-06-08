@@ -246,6 +246,8 @@ const createTestNotification = async (req, res) => {
   try {
     const idPenerima = req.user.id;
 
+    console.log('Creating test notification for user:', idPenerima);
+
     const testNotification = await Notifikasi.create({
       id_penerima: idPenerima,
       id_pengirim: idPenerima, // Self notification for testing
@@ -255,14 +257,41 @@ const createTestNotification = async (req, res) => {
       dibaca: false
     });
 
+    console.log('Test notification created:', testNotification.id);
+
     res.status(201).json({
       message: 'Test notification created successfully',
       notification: testNotification
     });
   } catch (err) {
     console.error('Failed to create test notification:', err);
+    console.error('Error details:', {
+      message: err.message,
+      stack: err.stack
+    });
     res.status(500).json({
       message: 'Failed to create test notification',
+      error: err.message
+    });
+  }
+};
+
+// Force database sync endpoint
+const forceDatabaseSync = async (req, res) => {
+  try {
+    const { sequelize } = require('../config/database');
+
+    console.log('Force syncing database...');
+    await sequelize.sync({ alter: true });
+    console.log('Database sync completed');
+
+    res.json({
+      message: 'Database sync completed successfully'
+    });
+  } catch (err) {
+    console.error('Failed to sync database:', err);
+    res.status(500).json({
+      message: 'Failed to sync database',
       error: err.message
     });
   }
@@ -284,5 +313,6 @@ module.exports = {
   createLikeNotification,
   createDownvoteNotification,
   createCommentNotification,
-  createTestNotification
+  createTestNotification,
+  forceDatabaseSync
 };
