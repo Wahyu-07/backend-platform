@@ -49,10 +49,11 @@ module.exports = (sequelize) => {
       as: 'penulis',
     });
 
-    Komentar.hasMany(models.Interaksi, {
-      foreignKey: 'id_komentar',
-      as: 'interaksi',
-    });
+    // Temporarily commented out due to missing status column in production database
+    // Komentar.hasMany(models.Interaksi, {
+    //   foreignKey: 'id_komentar',
+    //   as: 'interaksi',
+    // });
   };
 
   return Komentar;

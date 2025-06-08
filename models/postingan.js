@@ -77,11 +77,12 @@ module.exports = (sequelize) => {
       as: 'komentar',
     });
 
-    Postingan.hasMany(models.Interaksi, {
-      foreignKey: 'id_postingan',
-      as: 'interaksi',
-      onDelete: 'CASCADE',
-    });
+    // Temporarily commented out due to missing status column in production database
+    // Postingan.hasMany(models.Interaksi, {
+    //   foreignKey: 'id_postingan',
+    //   as: 'interaksi',
+    //   onDelete: 'CASCADE',
+    // });
 
     Postingan.hasMany(models.Notifikasi, {
       foreignKey: 'id_postingan',

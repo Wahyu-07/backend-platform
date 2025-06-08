@@ -7,9 +7,9 @@ const getAllInteraksi = async (req, res) => {
     // Filter untuk hanya menampilkan reports yang aktif (belum diselesaikan/diabaikan)
     const whereClause = {};
 
-    // Untuk admin panel, hanya tampilkan reports yang aktif
-    // Reports yang sudah diabaikan/diselesaikan tidak perlu ditampilkan
-    whereClause.status = 'aktif';
+    // Temporarily disabled status filter due to missing status column in production
+    // TODO: Re-enable when database migration is complete
+    // whereClause.status = 'aktif';
 
     const interaksi = await Interaksi.findAll({
       where: whereClause,
@@ -247,6 +247,13 @@ const updateInteraksi = async (req, res) => {
 // PUT update status report (untuk admin)
 const updateReportStatus = async (req, res) => {
   try {
+    // Temporarily disabled due to missing status column in production database
+    return res.status(503).json({
+      error: 'Fitur update status sedang dalam perbaikan',
+      detail: 'Database schema sedang diupdate'
+    });
+
+    /* TODO: Re-enable when database migration is complete
     const { id } = req.params;
     const { status } = req.body;
 
@@ -272,6 +279,7 @@ const updateReportStatus = async (req, res) => {
       message: `Status report berhasil diubah menjadi ${status}`,
       interaksi: interaksi
     });
+    */
   } catch (error) {
     res.status(500).json({ error: 'Gagal mengupdate status report', detail: error.message });
   }
