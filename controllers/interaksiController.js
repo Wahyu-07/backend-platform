@@ -139,9 +139,11 @@ const createInteraksiPostingan = async (req, res) => {
       alasan_laporan: tipe === 'lapor' ? alasan_laporan : null,
     });
 
-    // Buat notifikasi untuk pemilik postingan
-    if (tipe === 'upvote' || tipe === 'downvote') {
+    // Buat notifikasi untuk pemilik postingan (hanya untuk interaksi baru, bukan toggle off)
+    if ((tipe === 'upvote' || tipe === 'downvote') && !existingInteraksi) {
       try {
+        console.log('Creating notification for interaction:', { tipe, id_postingan, id_pengguna });
+
         // Ambil data postingan dan pemiliknya
         const postingan = await Postingan.findByPk(id_postingan, {
           include: [
@@ -154,12 +156,16 @@ const createInteraksiPostingan = async (req, res) => {
         });
 
         if (postingan && postingan.penulis) {
+          console.log('Post found, owner:', postingan.penulis.nama);
+
           // Ambil data user yang melakukan interaksi
           const userPengirim = await Pengguna.findByPk(id_pengguna, {
             attributes: ['nama']
           });
 
           if (userPengirim) {
+            console.log('User found:', userPengirim.nama);
+
             if (tipe === 'upvote') {
               await createLikeNotification(
                 id_pengguna,
@@ -177,10 +183,21 @@ const createInteraksiPostingan = async (req, res) => {
                 postingan.judul
               );
             }
+          } else {
+            console.log('User not found for notification');
           }
+        } else {
+          console.log('Post or post owner not found for notification');
         }
       } catch (notifError) {
         console.error('Error creating notification:', notifError);
+        console.error('Notification error details:', {
+          message: notifError.message,
+          stack: notifError.stack,
+          tipe,
+          id_postingan,
+          id_pengguna
+        });
         // Jangan gagalkan request utama jika notifikasi gagal
       }
     }

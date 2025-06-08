@@ -16,6 +16,7 @@ router.post('/', authenticate, createNotifikasi);
 
 // Tandai semua notifikasi sebagai dibaca (harus sebelum /:id/dibaca)
 router.put('/semua-dibaca', authenticate, tandaiSemuaDibaca);
+router.put('/semua/dibaca', authenticate, tandaiSemuaDibaca); // Alternative endpoint for frontend compatibility
 
 // Tandai satu notifikasi sebagai dibaca
 router.put('/:id/dibaca', authenticate, tandaiNotifikasiDibaca);
