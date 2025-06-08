@@ -175,6 +175,27 @@ const createNotifikasiUpvote = async (id_pengirim, id_penerima, id_postingan, na
 };
 
 /**
+ * Helper: Buat notifikasi untuk downvote
+ */
+const createNotifikasiDownvote = async (id_pengirim, id_penerima, id_postingan, namaPengirim, judulPostingan) => {
+  try {
+    if (id_pengirim === id_penerima) return;
+
+    await Notifikasi.create({
+      id_penerima,
+      id_pengirim,
+      id_postingan,
+      tipe: 'downvote',
+      judul: 'Postingan Anda Mendapat Downvote',
+      pesan: `${namaPengirim} memberikan downvote pada postingan Anda: "${judulPostingan}"`,
+      dibaca: false
+    });
+  } catch (err) {
+    console.error('Gagal membuat notifikasi downvote:', err);
+  }
+};
+
+/**
  * Helper: Buat notifikasi untuk komentar
  */
 const createNotifikasiKomentar = async (id_pengirim, id_penerima, id_postingan, id_komentar, namaPengirim, judulPostingan) => {
@@ -196,11 +217,20 @@ const createNotifikasiKomentar = async (id_pengirim, id_penerima, id_postingan, 
   }
 };
 
+// Alias functions for backward compatibility
+const createLikeNotification = createNotifikasiUpvote;
+const createDownvoteNotification = createNotifikasiDownvote;
+const createCommentNotification = createNotifikasiKomentar;
+
 module.exports = {
   getAllNotifikasi,
   createNotifikasi,
   tandaiNotifikasiDibaca,
   tandaiSemuaDibaca,
   createNotifikasiUpvote,
-  createNotifikasiKomentar
+  createNotifikasiDownvote,
+  createNotifikasiKomentar,
+  createLikeNotification,
+  createDownvoteNotification,
+  createCommentNotification
 };

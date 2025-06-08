@@ -1,5 +1,5 @@
 const { Interaksi, Komentar, Postingan, Pengguna } = require('../models');
-const { createLikeNotification } = require('./notifikasiController');
+const { createLikeNotification, createDownvoteNotification } = require('./notifikasiController');
 
 // GET semua interaksi
 const getAllInteraksi = async (req, res) => {
@@ -139,8 +139,8 @@ const createInteraksiPostingan = async (req, res) => {
       alasan_laporan: tipe === 'lapor' ? alasan_laporan : null,
     });
 
-    // Jika tipe adalah upvote (like), buat notifikasi untuk pemilik postingan
-    if (tipe === 'upvote') {
+    // Buat notifikasi untuk pemilik postingan
+    if (tipe === 'upvote' || tipe === 'downvote') {
       try {
         // Ambil data postingan dan pemiliknya
         const postingan = await Postingan.findByPk(id_postingan, {
@@ -154,19 +154,29 @@ const createInteraksiPostingan = async (req, res) => {
         });
 
         if (postingan && postingan.penulis) {
-          // Ambil data user yang melakukan like
+          // Ambil data user yang melakukan interaksi
           const userPengirim = await Pengguna.findByPk(id_pengguna, {
             attributes: ['nama']
           });
 
           if (userPengirim) {
-            await createLikeNotification(
-              id_pengguna,
-              postingan.penulis.id,
-              id_postingan,
-              userPengirim.nama,
-              postingan.judul
-            );
+            if (tipe === 'upvote') {
+              await createLikeNotification(
+                id_pengguna,
+                postingan.penulis.id,
+                id_postingan,
+                userPengirim.nama,
+                postingan.judul
+              );
+            } else if (tipe === 'downvote') {
+              await createDownvoteNotification(
+                id_pengguna,
+                postingan.penulis.id,
+                id_postingan,
+                userPengirim.nama,
+                postingan.judul
+              );
+            }
           }
         }
       } catch (notifError) {
