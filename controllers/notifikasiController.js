@@ -241,6 +241,33 @@ const createNotifikasiKomentar = async (id_pengirim, id_penerima, id_postingan, 
   }
 };
 
+// Test endpoint to create a sample notification
+const createTestNotification = async (req, res) => {
+  try {
+    const idPenerima = req.user.id;
+
+    const testNotification = await Notifikasi.create({
+      id_penerima: idPenerima,
+      id_pengirim: idPenerima, // Self notification for testing
+      tipe: 'system',
+      judul: 'Test Notification',
+      pesan: 'This is a test notification to verify the system is working.',
+      dibaca: false
+    });
+
+    res.status(201).json({
+      message: 'Test notification created successfully',
+      notification: testNotification
+    });
+  } catch (err) {
+    console.error('Failed to create test notification:', err);
+    res.status(500).json({
+      message: 'Failed to create test notification',
+      error: err.message
+    });
+  }
+};
+
 // Alias functions for backward compatibility
 const createLikeNotification = createNotifikasiUpvote;
 const createDownvoteNotification = createNotifikasiDownvote;
@@ -256,5 +283,6 @@ module.exports = {
   createNotifikasiKomentar,
   createLikeNotification,
   createDownvoteNotification,
-  createCommentNotification
+  createCommentNotification,
+  createTestNotification
 };
