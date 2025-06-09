@@ -45,38 +45,7 @@ const getAllNotifikasi = async (req, res) => {
   }
 };
 
-// Helper function untuk menghapus notifikasi yang tidak valid (orphaned)
-const hapusNotifikasiTidakValid = async () => {
-  try {
-    // Hapus notifikasi yang merujuk ke postingan yang sudah tidak ada
-    await Notifikasi.destroy({
-      where: {
-        id_postingan: { [require('sequelize').Op.not]: null }
-      },
-      include: [{
-        model: Postingan,
-        as: 'postingan',
-        where: null,
-        required: false
-      }]
-    });
 
-    // Hapus notifikasi yang merujuk ke komentar yang sudah tidak ada
-    await Notifikasi.destroy({
-      where: {
-        id_komentar: { [require('sequelize').Op.not]: null }
-      },
-      include: [{
-        model: Komentar,
-        as: 'komentar',
-        where: null,
-        required: false
-      }]
-    });
-  } catch (error) {
-    console.error('Error saat menghapus notifikasi tidak valid:', error);
-  }
-};
 
 
 /**
@@ -241,61 +210,7 @@ const createNotifikasiKomentar = async (id_pengirim, id_penerima, id_postingan, 
   }
 };
 
-// Test endpoint to create a sample notification
-const createTestNotification = async (req, res) => {
-  try {
-    const idPenerima = req.user.id;
 
-    console.log('Creating test notification for user:', idPenerima);
-
-    const testNotification = await Notifikasi.create({
-      id_penerima: idPenerima,
-      id_pengirim: idPenerima, // Self notification for testing
-      tipe: 'system',
-      judul: 'Test Notification',
-      pesan: 'This is a test notification to verify the system is working.',
-      dibaca: false
-    });
-
-    console.log('Test notification created:', testNotification.id);
-
-    res.status(201).json({
-      message: 'Test notification created successfully',
-      notification: testNotification
-    });
-  } catch (err) {
-    console.error('Failed to create test notification:', err);
-    console.error('Error details:', {
-      message: err.message,
-      stack: err.stack
-    });
-    res.status(500).json({
-      message: 'Failed to create test notification',
-      error: err.message
-    });
-  }
-};
-
-// Force database sync endpoint
-const forceDatabaseSync = async (req, res) => {
-  try {
-    const { sequelize } = require('../config/database');
-
-    console.log('Force syncing database...');
-    await sequelize.sync({ alter: true });
-    console.log('Database sync completed');
-
-    res.json({
-      message: 'Database sync completed successfully'
-    });
-  } catch (err) {
-    console.error('Failed to sync database:', err);
-    res.status(500).json({
-      message: 'Failed to sync database',
-      error: err.message
-    });
-  }
-};
 
 // Alias functions for backward compatibility
 const createLikeNotification = createNotifikasiUpvote;
@@ -312,7 +227,5 @@ module.exports = {
   createNotifikasiKomentar,
   createLikeNotification,
   createDownvoteNotification,
-  createCommentNotification,
-  createTestNotification,
-  forceDatabaseSync
+  createCommentNotification
 };
