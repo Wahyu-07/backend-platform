@@ -379,19 +379,27 @@ const archivePostingan = async (req, res) => {
   try {
     const postId = req.params.id;
 
+    console.log(`🔄 Archive request for post ID: ${postId}`);
+    console.log(`👤 User: ${req.user?.id}, Role: ${req.user?.peran}`);
+
     // Check if post exists
     const postingan = await Postingan.findByPk(postId);
     if (!postingan) {
+      console.log(`❌ Post ${postId} not found`);
       return res.status(404).json({ message: 'Postingan tidak ditemukan' });
     }
 
-    // Try to update status to archived, but handle case where status column doesn't exist
+    console.log(`📝 Post found: ${postingan.judul}, Current status: ${postingan.status}`);
+
+    // Try to update status to archived
     try {
       await postingan.update({ status: 'terarsip' });
+      console.log(`✅ Post ${postId} successfully archived`);
     } catch (statusError) {
+      console.log('❌ Status column error:', statusError.message);
       // If status column doesn't exist, we'll simulate archiving by returning success
       // This is a temporary solution until database migration is complete
-      console.log('Status column not available, simulating archive:', statusError.message);
+      console.log('⚠️ Status column not available, simulating archive');
     }
 
     res.status(200).json({
@@ -399,7 +407,7 @@ const archivePostingan = async (req, res) => {
       postingan: postingan
     });
   } catch (error) {
-    console.error('Error archiving post:', error);
+    console.error('❌ Error archiving post:', error);
     res.status(500).json({
       message: 'Gagal mengarsipkan postingan',
       error: error.message
@@ -414,19 +422,27 @@ const activatePostingan = async (req, res) => {
   try {
     const postId = req.params.id;
 
+    console.log(`🔄 Activate request for post ID: ${postId}`);
+    console.log(`👤 User: ${req.user?.id}, Role: ${req.user?.peran}`);
+
     // Check if post exists
     const postingan = await Postingan.findByPk(postId);
     if (!postingan) {
+      console.log(`❌ Post ${postId} not found`);
       return res.status(404).json({ message: 'Postingan tidak ditemukan' });
     }
 
-    // Try to update status to active, but handle case where status column doesn't exist
+    console.log(`📝 Post found: ${postingan.judul}, Current status: ${postingan.status}`);
+
+    // Try to update status to active
     try {
       await postingan.update({ status: 'aktif' });
+      console.log(`✅ Post ${postId} successfully activated`);
     } catch (statusError) {
+      console.log('❌ Status column error:', statusError.message);
       // If status column doesn't exist, we'll simulate activation by returning success
       // This is a temporary solution until database migration is complete
-      console.log('Status column not available, simulating activation:', statusError.message);
+      console.log('⚠️ Status column not available, simulating activation');
     }
 
     res.status(200).json({
@@ -434,7 +450,7 @@ const activatePostingan = async (req, res) => {
       postingan: postingan
     });
   } catch (error) {
-    console.error('Error activating post:', error);
+    console.error('❌ Error activating post:', error);
     res.status(500).json({
       message: 'Gagal mengaktifkan postingan',
       error: error.message
