@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const interaksiController = require('../controllers/interaksiController');
 const { authenticate } = require('../middleware/authentikasi');
-const { forPengguna, forPenggunaDanPeninjau } = require('../middleware/authorisasi');
+const { forPengguna, forPeninjau, forPenggunaDanPeninjau } = require('../middleware/authorisasi');
 
 router.get('/', interaksiController.getAllInteraksi);
 router.get('/:id', interaksiController.getInteraksiById);
@@ -15,7 +15,7 @@ router.post('/komentar', authenticate, forPenggunaDanPeninjau, interaksiControll
 router.put('/:id', authenticate, forPengguna, interaksiController.updateInteraksi);
 
 // Update status report (khusus untuk peninjau/admin)
-router.put('/:id/status', authenticate, forPenggunaDanPeninjau, interaksiController.updateReportStatus);
+router.put('/:id/status', authenticate, forPeninjau, interaksiController.updateReportStatus);
 
 router.delete('/:id', authenticate, forPenggunaDanPeninjau, interaksiController.deleteInteraksi);
 
