@@ -5,9 +5,7 @@ const {
   getAllNotifikasi,
   createNotifikasi,
   tandaiNotifikasiDibaca,
-  tandaiSemuaDibaca,
-  createTestNotification,
-  forceDatabaseSync
+  tandaiSemuaDibaca
 } = require('../controllers/notifikasiController');
 
 // Ambil semua notifikasi untuk pengguna login
@@ -22,11 +20,5 @@ router.put('/semua/dibaca', authenticate, tandaiSemuaDibaca); // Alternative end
 
 // Tandai satu notifikasi sebagai dibaca
 router.put('/:id/dibaca', authenticate, tandaiNotifikasiDibaca);
-
-// Test endpoint to create sample notification
-router.post('/test', authenticate, createTestNotification);
-
-// Force database sync endpoint (admin only)
-router.post('/sync-db', authenticate, forceDatabaseSync);
 
 module.exports = router;
