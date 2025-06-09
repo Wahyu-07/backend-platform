@@ -1,6 +1,7 @@
 // postinganController.js
-const { Postingan, Kategori, Pengguna, Interaksi } = require('../models');
+const { Postingan, Kategori, Pengguna, Interaksi, Komentar, Notifikasi } = require('../models');
 const { Op } = require('sequelize');
+const sequelize = require('../config/database');
 
 
 
@@ -113,7 +114,7 @@ const getAllPostingan = async (req, res) => {
   try {
     console.log('📝 getAllPostingan called with query:', req.query);
 
-    const { id_penulis, filter, sort } = req.query;
+    const { id_penulis, filter, sort, kategori } = req.query;
 
     let whereClause = {};
     let orderClause = [['dibuat_pada', 'DESC']]; // default sort
@@ -124,7 +125,8 @@ const getAllPostingan = async (req, res) => {
     }
 
     // Filter berdasarkan kategori jika ada dan bukan 'semua'
-    if (filter && filter !== 'semua') {
+    const categoryFilter = kategori || filter;
+    if (categoryFilter && categoryFilter !== 'semua') {
       // Mapping dari slug kategori ke nama kategori
       const categoryMapping = {
         'fasilitas-kampus': 'Fasilitas Kampus',
@@ -139,12 +141,12 @@ const getAllPostingan = async (req, res) => {
         'saran-inovasi': 'Saran dan Inovasi'
       };
 
-      const categoryName = categoryMapping[filter];
+      const categoryName = categoryMapping[categoryFilter];
       if (categoryName) {
         // Cari kategori berdasarkan nama
-        const kategori = await Kategori.findOne({ where: { nama: categoryName } });
-        if (kategori) {
-          whereClause.id_kategori = kategori.id;
+        const kategoriData = await Kategori.findOne({ where: { nama: categoryName } });
+        if (kategoriData) {
+          whereClause.id_kategori = kategoriData.id;
         }
       }
     }
@@ -196,8 +198,11 @@ const getAllPostingan = async (req, res) => {
         }
         return new Date(b.dibuat_pada) - new Date(a.dibuat_pada);
       });
+    } else if (sort === 'asc') {
+      // Sort berdasarkan tanggal terlama (ascending)
+      postinganWithCounts.sort((a, b) => new Date(a.dibuat_pada) - new Date(b.dibuat_pada));
     } else {
-      // Default sort: terbaru (sudah diurutkan dari query)
+      // Default sort: terbaru (descending)
       postinganWithCounts.sort((a, b) => new Date(b.dibuat_pada) - new Date(a.dibuat_pada));
     }
 
@@ -286,19 +291,77 @@ const updatePostingan = async (req, res) => {
  * DELETE postingan berdasarkan ID
  */
 const deletePostingan = async (req, res) => {
-  try {
-    const jumlahHapus = await Postingan.destroy({
-      where: { id: req.params.id }
-    });
+  const transaction = await sequelize.transaction();
 
-    if (!jumlahHapus) {
+  try {
+    const postId = req.params.id;
+
+    // Check if post exists
+    const postingan = await Postingan.findByPk(postId);
+    if (!postingan) {
+      await transaction.rollback();
       return res.status(404).json({ message: 'Postingan tidak ditemukan' });
     }
 
+    // Delete related records in the correct order to avoid foreign key constraints
+
+    // 1. Delete all notifications related to this post
+    await Notifikasi.destroy({
+      where: { id_postingan: postId },
+      transaction
+    });
+
+    // 2. Delete all interactions (upvotes, downvotes, reports) related to this post
+    await Interaksi.destroy({
+      where: { id_postingan: postId },
+      transaction
+    });
+
+    // 3. Delete all comments related to this post (and their interactions)
+    const comments = await Komentar.findAll({
+      where: { id_postingan: postId },
+      attributes: ['id'],
+      transaction
+    });
+
+    if (comments.length > 0) {
+      const commentIds = comments.map(comment => comment.id);
+
+      // Delete interactions on comments
+      await Interaksi.destroy({
+        where: { id_komentar: commentIds },
+        transaction
+      });
+
+      // Delete notifications related to comments
+      await Notifikasi.destroy({
+        where: { id_komentar: commentIds },
+        transaction
+      });
+
+      // Delete the comments themselves
+      await Komentar.destroy({
+        where: { id_postingan: postId },
+        transaction
+      });
+    }
+
+    // 4. Finally, delete the post itself
+    await Postingan.destroy({
+      where: { id: postId },
+      transaction
+    });
+
+    await transaction.commit();
     res.status(200).json({ message: 'Postingan berhasil dihapus' });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Gagal menghapus postingan', error });
+    await transaction.rollback();
+    console.error('Error deleting post:', error);
+    res.status(500).json({
+      message: 'Gagal menghapus postingan',
+      error: error.message
+    });
   }
 };
 

@@ -116,6 +116,39 @@ const deletePengguna = async (req, res) => {
   }
 };
 
+// UPDATE profile picture
+const updateProfilePicture = async (req, res) => {
+  try {
+    const userId = req.user.id; // From authentication middleware
+    const { profile_picture } = req.body;
+
+    // Find user
+    const pengguna = await Pengguna.findByPk(userId);
+    if (!pengguna) {
+      return res.status(404).json({ error: 'Pengguna tidak ditemukan' });
+    }
+
+    // Update profile picture
+    await pengguna.update({ profile_picture });
+
+    // Return updated user data (without password)
+    const updatedUser = await Pengguna.findByPk(userId, {
+      attributes: { exclude: ['kata_sandi'] }
+    });
+
+    res.json({
+      message: 'Foto profil berhasil diperbarui',
+      user: updatedUser
+    });
+  } catch (error) {
+    console.error('Error updating profile picture:', error);
+    res.status(500).json({
+      error: 'Gagal memperbarui foto profil',
+      detail: error.message
+    });
+  }
+};
+
 module.exports = {
   getAllPengguna,
   getPenggunaById,
@@ -124,4 +157,5 @@ module.exports = {
   createPengguna,
   updatePengguna,
   deletePengguna,
+  updateProfilePicture,
 };

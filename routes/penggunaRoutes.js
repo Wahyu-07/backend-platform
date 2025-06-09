@@ -10,6 +10,9 @@ router.get('/:id/postingan', authenticate, penggunaController.getPostinganByPeng
 router.get('/:id', authenticate, penggunaController.getPenggunaById);
 router.get('/', authenticate, penggunaController.getAllPengguna);
 
+// Profile picture update (user can update their own)
+router.put('/profile-picture', authenticate, penggunaController.updateProfilePicture);
+
 // Route yang hanya boleh diakses peninjau
 router.post('/', authenticate, forPeninjau, penggunaController.createPengguna);
 router.put('/:id', authenticate, forPeninjau, penggunaController.updatePengguna);
