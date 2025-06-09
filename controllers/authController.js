@@ -136,7 +136,8 @@ const login = async (req, res) => {
         nim: pengguna.nim,
         nama: pengguna.nama,
         email: pengguna.email,
-        peran: pengguna.peran
+        peran: pengguna.peran,
+        profile_picture: pengguna.profile_picture
       }
     });
   } catch (err) {

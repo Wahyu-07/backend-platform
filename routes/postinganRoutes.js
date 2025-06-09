@@ -19,12 +19,9 @@ router.put('/:id', authenticate, forPenggunaDanPeninjau, postinganController.upd
 router.delete('/:id', authenticate, forPenggunaDanPeninjau, postinganController.deletePostingan);
 
 // Archive/Activate routes - only for peninjau (admin)
-// Temporarily removing auth for debugging
-router.patch('/:id/archive', postinganController.archivePostingan);
-router.patch('/:id/activate', postinganController.activatePostingan);
-
-// Test route for debugging archive functionality
-router.patch('/test/archive', postinganController.testArchive);
+// Changed from PATCH to POST to fix CORS issues
+router.post('/:id/archive', authenticate, forPenggunaDanPeninjau, postinganController.archivePostingan);
+router.post('/:id/activate', authenticate, forPenggunaDanPeninjau, postinganController.activatePostingan);
 
 // TEMPORARY: Redirect old comment endpoint to new one
 // This handles requests from frontend that still use /api/postingan/:id/komentar

@@ -458,30 +458,6 @@ const activatePostingan = async (req, res) => {
   }
 };
 
-/**
- * TEST ARCHIVE endpoint - for debugging
- */
-const testArchive = async (req, res) => {
-  try {
-    console.log('🧪 Test archive endpoint called');
-    console.log('📝 Method:', req.method);
-    console.log('📝 Headers:', req.headers);
-    console.log('📝 Body:', req.body);
-
-    res.status(200).json({
-      message: 'Test archive endpoint working',
-      method: req.method,
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('❌ Test archive error:', error);
-    res.status(500).json({
-      message: 'Test archive failed',
-      error: error.message
-    });
-  }
-};
-
 // Export semua fungsi controller sekaligus
 module.exports = {
   getPostinganByNamaKategori,
@@ -492,5 +468,4 @@ module.exports = {
   deletePostingan,
   archivePostingan,
   activatePostingan,
-  testArchive,
 };
