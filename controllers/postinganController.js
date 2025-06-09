@@ -127,26 +127,33 @@ const getAllPostingan = async (req, res) => {
     // Filter berdasarkan kategori jika ada dan bukan 'semua'
     const categoryFilter = kategori || filter;
     if (categoryFilter && categoryFilter !== 'semua') {
-      // Mapping dari slug kategori ke nama kategori
-      const categoryMapping = {
-        'fasilitas-kampus': 'Fasilitas Kampus',
-        'akademik': 'Akademik',
-        'kesejahteraan-mahasiswa': 'Kesejahteraan Mahasiswa',
-        'kegiatan-kemahasiswaan': 'Kegiatan Kemahasiswaan',
-        'sarana-prasarana-digital': 'Sarana dan Prasarana Digital',
-        'keamanan-ketertiban': 'Keamanan dan Ketertiban',
-        'lingkungan-kebersihan': 'Lingkungan dan Kebersihan',
-        'transportasi-akses': 'Transportasi dan Akses',
-        'kebijakan-administrasi': 'Kebijakan dan Administrasi',
-        'saran-inovasi': 'Saran dan Inovasi'
-      };
+      // Check if it's a numeric ID first
+      const categoryId = parseInt(categoryFilter);
+      if (!isNaN(categoryId)) {
+        // Direct category ID filtering
+        whereClause.id_kategori = categoryId;
+      } else {
+        // Mapping dari slug kategori ke nama kategori (fallback)
+        const categoryMapping = {
+          'fasilitas-kampus': 'Fasilitas Kampus',
+          'akademik': 'Akademik',
+          'kesejahteraan-mahasiswa': 'Kesejahteraan Mahasiswa',
+          'kegiatan-kemahasiswaan': 'Kegiatan Kemahasiswaan',
+          'sarana-prasarana-digital': 'Sarana dan Prasarana Digital',
+          'keamanan-ketertiban': 'Keamanan dan Ketertiban',
+          'lingkungan-kebersihan': 'Lingkungan dan Kebersihan',
+          'transportasi-akses': 'Transportasi dan Akses',
+          'kebijakan-administrasi': 'Kebijakan dan Administrasi',
+          'saran-inovasi': 'Saran dan Inovasi'
+        };
 
-      const categoryName = categoryMapping[categoryFilter];
-      if (categoryName) {
-        // Cari kategori berdasarkan nama
-        const kategoriData = await Kategori.findOne({ where: { nama: categoryName } });
-        if (kategoriData) {
-          whereClause.id_kategori = kategoriData.id;
+        const categoryName = categoryMapping[categoryFilter];
+        if (categoryName) {
+          // Cari kategori berdasarkan nama
+          const kategoriData = await Kategori.findOne({ where: { nama: categoryName } });
+          if (kategoriData) {
+            whereClause.id_kategori = kategoriData.id;
+          }
         }
       }
     }
@@ -365,6 +372,64 @@ const deletePostingan = async (req, res) => {
   }
 };
 
+/**
+ * ARCHIVE postingan berdasarkan ID
+ */
+const archivePostingan = async (req, res) => {
+  try {
+    const postId = req.params.id;
+
+    // Check if post exists
+    const postingan = await Postingan.findByPk(postId);
+    if (!postingan) {
+      return res.status(404).json({ message: 'Postingan tidak ditemukan' });
+    }
+
+    // Update status to archived
+    await postingan.update({ status: 'terarsip' });
+
+    res.status(200).json({
+      message: 'Postingan berhasil diarsipkan',
+      postingan: postingan
+    });
+  } catch (error) {
+    console.error('Error archiving post:', error);
+    res.status(500).json({
+      message: 'Gagal mengarsipkan postingan',
+      error: error.message
+    });
+  }
+};
+
+/**
+ * ACTIVATE postingan berdasarkan ID
+ */
+const activatePostingan = async (req, res) => {
+  try {
+    const postId = req.params.id;
+
+    // Check if post exists
+    const postingan = await Postingan.findByPk(postId);
+    if (!postingan) {
+      return res.status(404).json({ message: 'Postingan tidak ditemukan' });
+    }
+
+    // Update status to active
+    await postingan.update({ status: 'aktif' });
+
+    res.status(200).json({
+      message: 'Postingan berhasil diaktifkan',
+      postingan: postingan
+    });
+  } catch (error) {
+    console.error('Error activating post:', error);
+    res.status(500).json({
+      message: 'Gagal mengaktifkan postingan',
+      error: error.message
+    });
+  }
+};
+
 // Export semua fungsi controller sekaligus
 module.exports = {
   getPostinganByNamaKategori,
@@ -373,4 +438,6 @@ module.exports = {
   getPostinganById,
   updatePostingan,
   deletePostingan,
+  archivePostingan,
+  activatePostingan,
 };

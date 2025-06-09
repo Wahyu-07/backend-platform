@@ -18,6 +18,10 @@ router.post('/', authenticate, forPenggunaDanPeninjau, postinganController.creat
 router.put('/:id', authenticate, forPenggunaDanPeninjau, postinganController.updatePostingan);
 router.delete('/:id', authenticate, forPenggunaDanPeninjau, postinganController.deletePostingan);
 
+// Archive/Activate routes - only for peninjau (admin)
+router.patch('/:id/archive', authenticate, forPenggunaDanPeninjau, postinganController.archivePostingan);
+router.patch('/:id/activate', authenticate, forPenggunaDanPeninjau, postinganController.activatePostingan);
+
 // TEMPORARY: Redirect old comment endpoint to new one
 // This handles requests from frontend that still use /api/postingan/:id/komentar
 router.get('/:id/komentar', (req, res) => {

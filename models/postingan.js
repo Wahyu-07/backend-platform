@@ -37,10 +37,10 @@ module.exports = (sequelize) => {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    // status: {
-    //   type: DataTypes.ENUM('aktif', 'terarsip'),
-    //   defaultValue: 'aktif',
-    // },
+    status: {
+      type: DataTypes.ENUM('aktif', 'terarsip'),
+      defaultValue: 'aktif',
+    },
     dibuat_pada: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
