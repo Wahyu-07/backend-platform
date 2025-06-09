@@ -1,4 +1,4 @@
-const { Interaksi, Komentar, Postingan, Pengguna } = require('../models');
+const { Interaksi, Komentar, Postingan, Pengguna, Sequelize } = require('../models');
 const { createLikeNotification, createDownvoteNotification } = require('./notifikasiController');
 
 // GET semua interaksi
@@ -7,9 +7,14 @@ const getAllInteraksi = async (req, res) => {
     // Filter untuk hanya menampilkan reports yang aktif (belum diselesaikan/diabaikan)
     const whereClause = {};
 
-    // Temporarily disabled status filter due to missing status column in production
-    // TODO: Re-enable when database migration is complete
-    // whereClause.status = 'aktif';
+    // Filter berdasarkan query parameter
+    if (req.query.status) {
+      whereClause.status = req.query.status;
+    }
+
+    if (req.query.tipe) {
+      whereClause.tipe = req.query.tipe;
+    }
 
     const interaksi = await Interaksi.findAll({
       where: whereClause,
@@ -275,14 +280,87 @@ const updateInteraksi = async (req, res) => {
 // PUT update status report (untuk admin)
 const updateReportStatus = async (req, res) => {
   try {
-    // Temporarily disabled due to missing status column in production database
-    return res.status(503).json({
-      error: 'Fitur update status sedang dalam perbaikan',
-      detail: 'Database schema sedang diupdate'
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validasi status yang diizinkan
+    const allowedStatuses = ['aktif', 'diabaikan', 'diselesaikan'];
+    if (!status || !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        error: 'Status tidak valid',
+        detail: 'Status harus salah satu dari: aktif, diabaikan, diselesaikan'
+      });
+    }
+
+    // Cari interaksi berdasarkan ID
+    const interaksi = await Interaksi.findByPk(id);
+    if (!interaksi) {
+      return res.status(404).json({ error: 'Interaksi tidak ditemukan' });
+    }
+
+    // Hanya laporan yang bisa diupdate statusnya
+    if (interaksi.tipe !== 'lapor') {
+      return res.status(400).json({
+        error: 'Hanya laporan yang dapat diupdate statusnya',
+        detail: 'Interaksi ini bukan laporan'
+      });
+    }
+
+    // Update status
+    await interaksi.update({ status });
+
+    res.json({
+      message: 'Status laporan berhasil diupdate',
+      interaksi: {
+        id: interaksi.id,
+        tipe: interaksi.tipe,
+        status: interaksi.status,
+        alasan_laporan: interaksi.alasan_laporan
+      }
     });
 
   } catch (error) {
+    console.error('Error updating report status:', error);
     res.status(500).json({ error: 'Gagal mengupdate status report', detail: error.message });
+  }
+};
+
+// GET statistik interaksi berdasarkan status (untuk admin)
+const getInteraksiStats = async (req, res) => {
+  try {
+    const stats = await Interaksi.findAll({
+      attributes: [
+        'status',
+        [Sequelize.fn('COUNT', Sequelize.col('id')), 'count']
+      ],
+      where: {
+        tipe: 'lapor' // Hanya hitung laporan
+      },
+      group: ['status'],
+      raw: true
+    });
+
+    // Format response
+    const formattedStats = {
+      total: 0,
+      aktif: 0,
+      diabaikan: 0,
+      diselesaikan: 0
+    };
+
+    stats.forEach(stat => {
+      formattedStats[stat.status] = parseInt(stat.count);
+      formattedStats.total += parseInt(stat.count);
+    });
+
+    res.json({
+      message: 'Statistik laporan berhasil diambil',
+      stats: formattedStats
+    });
+
+  } catch (error) {
+    console.error('Error getting interaction stats:', error);
+    res.status(500).json({ error: 'Gagal mengambil statistik interaksi', detail: error.message });
   }
 };
 
@@ -308,5 +386,6 @@ module.exports = {
   createInteraksiKomentar,
   updateInteraksi,
   updateReportStatus,
+  getInteraksiStats,
   deleteInteraksi,
 };

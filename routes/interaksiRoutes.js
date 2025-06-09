@@ -5,6 +5,7 @@ const { authenticate } = require('../middleware/authentikasi');
 const { forPengguna, forPeninjau, forPenggunaDanPeninjau } = require('../middleware/authorisasi');
 
 router.get('/', interaksiController.getAllInteraksi);
+router.get('/stats', authenticate, forPeninjau, interaksiController.getInteraksiStats);
 router.get('/:id', interaksiController.getInteraksiById);
 
 // Pengguna dan peninjau boleh membuat interaksi postingan/komentar
