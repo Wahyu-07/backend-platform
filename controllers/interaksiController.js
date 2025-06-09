@@ -46,7 +46,8 @@ const getAllInteraksi = async (req, res) => {
           as: 'pengguna',
           attributes: ['id', 'nama', 'peran']
         }
-      ]
+      ],
+      order: [['dibuat_pada', 'DESC']] // Sort by newest first
     });
     res.json(interaksi);
   } catch (error) {
