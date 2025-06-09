@@ -44,18 +44,11 @@ const register = async (req, res) => {
       peran: finalPeran,
     });
 
-    // Generate token untuk auto-login setelah register
-    const token = jwt.sign(
-      { id: pengguna.id, peran: pengguna.peran },
-      process.env.JWT_SECRET,
-      { expiresIn: '1d' }
-    );
-
     console.log('✅ Registration successful for:', pengguna.email);
     res.status(201).json({
-      message: 'Registrasi berhasil',
-      token,
-      user: {
+      message: 'Registrasi berhasil! Silakan login dengan akun Anda.',
+      success: true,
+      user_created: {
         id: pengguna.id,
         nim: pengguna.nim,
         nama: pengguna.nama,
