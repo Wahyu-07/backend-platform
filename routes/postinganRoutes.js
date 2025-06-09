@@ -4,7 +4,7 @@ const router = express.Router();
 const postinganController = require('../controllers/postinganController');
 const komentarController = require('../controllers/komentarController');
 const {authenticate} = require('../middleware/authentikasi');
-const { forPengguna, forPenggunaDanPeninjau } = require('../middleware/authorisasi');
+const { forPeninjau, forPenggunaDanPeninjau }= require('../middleware/authorisasi');
 
 // All Role
 router.get('/', postinganController.getAllPostingan);
